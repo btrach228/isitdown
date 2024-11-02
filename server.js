@@ -15,12 +15,11 @@ const urlsToCheck = [
     'https://usedcars.toyota.ua',
     'https://usedcars.lexus.ua',
     'https://stock.lexus.ua',
-    'https://sawa.toyota.ua/',
-    'https://sawa.toyota.ua/new-cars',
-
+    'https://sawa.toyota.ua',
+    'https://sawa.toyota.ua',
   ];
   
-let delayTime = 5000;//3600000;
+let delayTime = 3600000;
   // Variable to store the dynamic chat ID
   let dynamicChatId = null;
   
@@ -41,12 +40,12 @@ let delayTime = 5000;//3600000;
       try {
         const response = await fetch(url);
         if (response.status !== 200) {
-            delayTime=1000//300000
+            // delayTime=1000//300000
           bot.sendMessage(dynamicChatId, `УВАГА САЙТ НЕ ДОСТУПНИЙ:\n Виявлено для:${url}\n Статус код: ${response.status} ${response.statusText}`);
-          if(response.status == 200){
-            bot.sendMessage(dynamicChatId, `Доступ ${url} до відновлено`);
-            delayTime=5000//3600000
-          }
+        //   if(response.status == 200){
+        //     bot.sendMessage(dynamicChatId, `Доступ ${url} до відновлено`);
+        //     delayTime=5000//3600000
+        //   }
         } else {
           console.log(`Status code for ${url}: ${response.status}`);
         }
