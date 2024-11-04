@@ -47,6 +47,7 @@ bot.onText(/\/check (.+)/, (msg, match) => {
 async function checkUrlStatus(chatId, url) {
   try {
     const response = await fetchWithTimeout(url, checkConfig.timeout);
+    console.log(`Site: ${url}: status: ${response.status}`)
     bot.sendMessage(chatId, `Status code for ${url}: ${response.status}`);
     resetErrorCount(url); // Reset error count if the site responded
   } catch (error) {
