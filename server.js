@@ -32,7 +32,7 @@ bot.onText(/\/start/, (msg) => {
     saveChatIds(chatIds); // Save chat ID to file
   }
 
-  bot.sendMessage(chatId, 'Бот запущено! Надішліть URL у форматі /check <url>, щоб отримати статус.\n\nВи будете отримувати сповіщення, якщо один або більше сайтів будуть недоступні.');
+  bot.sendMessage(chatId, 'Бот запущено! Ви будете автоматично отримувати сповіщення, якщо один або більше сайтів будуть недоступні.\n\nЯкщо бажаєте перевіти певний сайт - надішліть URL у форматі /check <url>, щоб отримати статус.');
 });
 
 // Listen for the /check command with a URL
