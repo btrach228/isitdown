@@ -19,7 +19,7 @@ const urlsToCheck = [
     'https://sawa.toyota.ua',
   ];
   
-let delayTime = 3600000;
+let delayTime = 1000*60;// 1 min
   // Variable to store the dynamic chat ID
   let dynamicChatId = null;
   
