@@ -10,7 +10,7 @@ const bot = new TelegramBot(botToken, { polling: true });
 
 // Settings for checking sites
 const checkConfig = {
-  timeout: 10000, // 5 seconds timeout for each request
+  timeout: 10000, // 10 seconds timeout for each request
   errorThreshold: 5, // Number of consecutive errors to trigger an alert
 };
 
@@ -101,9 +101,9 @@ async function checkStatuses() {
     'https://lexus.com',
     'https://stock.lexus.ua',
     'https://almaz-motor.toyota.ua',
-    //'https://usedcars.toyota.ua',
-    //'https://usedcars.lexus.ua',
-    //'https://sawa.toyota.ua',
+    'https://usedcars.toyota.ua',
+    'https://usedcars.lexus.ua',
+    'https://sawa.toyota.ua',
   ];
 
   for (const url of urlsToCheck) {
@@ -129,7 +129,7 @@ async function checkStatuses() {
 }
 
 // Set an interval to check the status of all URLs every minute (adjust as needed)
-setInterval(checkStatuses, 60000);
+setInterval(checkStatuses, 600000);
 
 // Function to load chat IDs from file
 function loadChatIds() {
