@@ -100,9 +100,9 @@ async function checkStatuses() {
     'https://lexus.com',
     'https://stock.lexus.ua',
     'https://almaz-motor.toyota.ua',
-    'https://usedcars.lexus.ua',
-    'https://sawa.toyota.ua',
-    'https://sawa.toyota.ua',
+    //'https://usedcars.toyota.ua',
+    //'https://usedcars.lexus.ua',
+    //'https://sawa.toyota.ua',
   ];
 
   for (const url of urlsToCheck) {
