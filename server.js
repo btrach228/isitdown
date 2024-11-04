@@ -1,59 +1,155 @@
-// const TelegramBot = require('node-telegram-bot-api');
-// const fetch = require('node-fetch');
 import TelegramBot from 'node-telegram-bot-api';
 import fetch from 'node-fetch';
+import fs from 'fs'
 
 // Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you got from BotFather
 const botToken = '7490015692:AAFScp1LvvU1O-CLheIJ0YoG2Stb8vjNb6I';
 const bot = new TelegramBot(botToken, { polling: true });
 
-// Array of URLs to monitor
-const urlsToCheck = [
+
+
+// Settings for checking sites
+const checkConfig = {
+  timeout: 1000, // 5 seconds timeout for each request
+  errorThreshold: 5, // Number of consecutive errors to trigger an alert
+};
+
+// File for storing chat IDs
+const chatIdsFile = 'chatIds.json';
+
+// Load chat IDs from file
+let chatIds = loadChatIds();
+
+// Object to keep track of error counts for each site
+const errorCounts = {};
+
+// Listen for the /start command and add chat ID to chatIds if not already there
+bot.onText(/\/start/, (msg) => {
+  const chatId = msg.chat.id;
+
+  if (!chatIds.includes(chatId)) {
+    chatIds.push(chatId);
+    saveChatIds(chatIds); // Save chat ID to file
+  }
+
+  bot.sendMessage(chatId, 'Бот запущено! Надішліть URL у форматі /check <url>, щоб отримати статус.\n\nВи будете отримувати сповіщення, якщо один або більше сайтів будуть недоступні.');
+});
+
+// Listen for the /check command with a URL
+bot.onText(/\/check (.+)/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const urlToCheck = match[1];
+
+  checkUrlStatus(chatId, urlToCheck);
+});
+
+// Function to check the status of a specific URL
+async function checkUrlStatus(chatId, url) {
+  try {
+    const response = await fetchWithTimeout(url, checkConfig.timeout);
+    bot.sendMessage(chatId, `Status code for ${url}: ${response.status}`);
+    resetErrorCount(url); // Reset error count if the site responded
+  } catch (error) {
+    console.error('Error checking status:', error.message);
+    incrementErrorCount(url); // Increment error count if there was no response
+    bot.sendMessage(chatId, `Error checking status for ${url}: ${error.message}`);
+
+    // Check if the error threshold has been reached
+    if (errorCounts[url] >= checkConfig.errorThreshold) {
+      bot.sendMessage(chatId, `Alert: ${url} has been unresponsive multiple times. Possible DDoS attack or connectivity issue.`);
+      resetErrorCount(url); // Reset error count after alert
+    }
+  }
+}
+
+// Function to check URL status with a timeout
+async function fetchWithTimeout(url, timeout) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw new Error("No response (timeout reached)");
+  }
+}
+
+// Functions to handle error count
+function incrementErrorCount(url) {
+  if (!errorCounts[url]) errorCounts[url] = 0;
+  errorCounts[url]++;
+}
+
+function resetErrorCount(url) {
+  errorCounts[url] = 0;
+}
+
+// Function to periodically check multiple URLs for all saved chat IDs
+async function checkStatuses() {
+  if (chatIds.length === 0) {
+    console.log('No active chats. Waiting for /start command...');
+    return;
+  }
+
+  // Example URLs to monitor (modify or expand as needed)
+  const urlsToCheck = [
     'https://toyota.ua',
     'https://lexus.com',
-    'https://almaz-motor.toyota.ua',
-    'https://usedcars.toyota.ua',
-    'https://usedcars.lexus.ua',
     'https://stock.lexus.ua',
+    'https://almaz-motor.toyota.ua',
+    'https://usedcars.lexus.ua',
     'https://sawa.toyota.ua',
     'https://sawa.toyota.ua',
   ];
-  
-let delayTime = 3600000;
-  // Variable to store the dynamic chat ID
-  let dynamicChatId = null;
-  
-  // Listen for the /start command to set up the chat ID dynamically
-  bot.onText(/\/start/, (msg) => {
-    dynamicChatId = msg.chat.id;
-    bot.sendMessage(dynamicChatId, 'Бот запущено! Ви будете отримувати сповіщення, якщо один або більше сайтів будуть недоступні.');
-  });
-  
-  // Function to check the status of each URL
-  async function checkStatuses() {
-    if (!dynamicChatId) {
-      console.log('Waiting for /start command to set chat ID...');
-      return;
-    }
-  
-    for (const url of urlsToCheck) {
+
+  for (const url of urlsToCheck) {
+    for (const chatId of chatIds) {
       try {
-        const response = await fetch(url);
+        const response = await fetchWithTimeout(url, checkConfig.timeout);
         if (response.status !== 200) {
-            // delayTime=1000//300000
-          bot.sendMessage(dynamicChatId, `УВАГА САЙТ НЕ ДОСТУПНИЙ:\n Виявлено для:${url}\n Статус код: ${response.status} ${response.statusText}`);
-        //   if(response.status == 200){
-        //     bot.sendMessage(dynamicChatId, `Доступ ${url} до відновлено`);
-        //     delayTime=5000//3600000
-        //   }
-        } else {
-          console.log(`Status code for ${url}: ${response.status}`);
+            bot.sendMessage(chatId, `Увага!: Помилка ${response.status} ${response.message} виявлено для ${url}`);
         }
+        resetErrorCount(url); // Reset error count if the site responded
       } catch (error) {
-        console.error(`Error checking status for ${url}:`, error);
+        console.error(`Error checking status for ${url}:`, error.message);
+        incrementErrorCount(url);
+
+        // Check if the error threshold has been reached
+        if (errorCounts[url] >= checkConfig.errorThreshold) {
+          bot.sendMessage(chatId, `Увага!: ${url} не відповідає кілька разів. Можлива DDoS-атака або проблема зі з'єднанням.`);
+          resetErrorCount(url); // Reset error count after alert
+        }
       }
     }
   }
-  
-  // Set an interval to check the statuses of all URLs every minute (or adjust as needed)
-  setInterval(checkStatuses, delayTime);
+}
+
+// Set an interval to check the status of all URLs every minute (adjust as needed)
+setInterval(checkStatuses, 60000);
+
+// Function to load chat IDs from file
+function loadChatIds() {
+  try {
+    if (fs.existsSync(chatIdsFile)) {
+      const data = fs.readFileSync(chatIdsFile);
+      return JSON.parse(data);
+    }
+    return [];
+  } catch (error) {
+    console.error('Error loading chat IDs:', error);
+    return [];
+  }
+}
+
+// Function to save chat IDs to file
+function saveChatIds(chatIds) {
+  try {
+    fs.writeFileSync(chatIdsFile, JSON.stringify(chatIds));
+  } catch (error) {
+    console.error('Error saving chat IDs:', error);
+  }
+}
+
