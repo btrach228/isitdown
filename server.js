@@ -10,7 +10,7 @@ const bot = new TelegramBot(botToken, { polling: true });
 
 // Settings for checking sites
 const checkConfig = {
-  timeout: 1000, // 5 seconds timeout for each request
+  timeout: 10000, // 5 seconds timeout for each request
   errorThreshold: 5, // Number of consecutive errors to trigger an alert
 };
 
