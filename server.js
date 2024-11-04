@@ -1,9 +1,10 @@
 import TelegramBot from 'node-telegram-bot-api';
 import fetch from 'node-fetch';
 import fs from 'fs'
-
+import dotenv from 'dotenv';
+dotenv.config();
 // Replace 'YOUR_TELEGRAM_BOT_TOKEN' with the token you got from BotFather
-const botToken = '7490015692:AAFScp1LvvU1O-CLheIJ0YoG2Stb8vjNb6I';
+const botToken = process.env.BOT_TOKEN;
 const bot = new TelegramBot(botToken, { polling: true });
 
 
