@@ -97,15 +97,7 @@ async function checkStatuses() {
   }
 
   // Example URLs to monitor (modify or expand as needed)
-  const urlsToCheck = [
-    'https://toyota.ua',
-    'https://lexus.com',
-    'https://stock.lexus.ua',
-    'https://almaz-motor.toyota.ua',
-    'https://usedcars.toyota.ua',
-    'https://usedcars.lexus.ua',
-    'https://sawa.toyota.ua',
-  ];
+  const urlsToCheck = process.env.SITE_LINKS;
 
   for (const url of urlsToCheck) {
     for (const chatId of chatIds) {
