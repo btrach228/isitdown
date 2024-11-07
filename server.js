@@ -89,6 +89,7 @@ function resetErrorCount(url) {
   errorCounts[url] = 0;
 }
 
+
 // Function to periodically check multiple URLs for all saved chat IDs
 async function checkStatuses() {
   if (chatIds.length === 0) {
