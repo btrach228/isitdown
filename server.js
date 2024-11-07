@@ -98,7 +98,7 @@ async function checkStatuses() {
   }
 
   // Example URLs to monitor (modify or expand as needed)
-  const urlsToCheck = process.env.SITE_LINKS;
+  const urlsToCheck = process.env.SITE_LINKS ? process.env.SITE_LINKS.split(','): true;
 
   for (const url of urlsToCheck) {
     for (const chatId of chatIds) {
