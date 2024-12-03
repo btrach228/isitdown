@@ -38,7 +38,7 @@ const errorCounts = {};
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
   const username = msg.chat.username || 'Anonymous';
-  const name = msg.chat.first_name;
+  const name = msg.chat.first_name || msg.from.first_name;
   try {
     // Check if the user already exists in the database
     let user = await User.findOne({ chatId });
