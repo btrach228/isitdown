@@ -163,6 +163,6 @@ async function checkStatuses() {
 }
 
 // Set an interval to check the status of all URLs every minute (adjust as needed)
-setInterval(checkStatuses, 60000);
+setInterval(checkStatuses, 3600000);
 
 
